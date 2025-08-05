@@ -1,0 +1,93 @@
+<div id="admin-content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10">
+                <h1 class="admin-heading"><i class="fa fa-file-text"></i> All Articles</h1>
+            </div>
+            <div class="col-md-2">
+                <a class="add-new" href="/admin/add-article">Add New Article</a>
+            </div>
+            <div class="col-md-12">
+                <div id="articleTable" class="border">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script>
+    const tableData= <%- JSON.stringify(articles)%>;
+    let table=new Tabulator("#articleTable", {
+        data: tableData,
+        layout: "fitColumns",
+        pagination: true,
+        paginationSize: 10,
+        paginationSizeSelector: [5, 10, 25, 100],
+        columns: [
+            { title: "S.No.", formatter: "rownum", width: 100, hozAlign: "center" },
+            { title: "Title", field: "title", headerFilter: "input" },
+            { title: "Category", field: "category.name", headerFilter: "input" },
+            { title: "Author", field: "author.fullname", headerFilter: "input" },
+            {
+                title: "Date", field: "createdAt", headerFilter: "input",
+                headerFilterPlaceholder: "DD MMM YYYY",
+                headerFilterFunc: function (headerValue, rowValue) {
+                    if (!headerValue) return true;
+
+                    const rawDate=new Date(rowValue);
+                    const day=String(rawDate.getDate()).padStart(2, '0');
+                    const month=rawDate.toLocaleString('default', { month: 'short' });
+                    const year=rawDate.getFullYear();
+                    const formattedDate=`${day} ${month} ${year}`;
+
+                    return formattedDate.toLowerCase().includes(headerValue.toLowerCase());
+                },
+
+                formatter: function (cell) {
+                    const rawDate=cell.getValue(); // ISO string or timestamp
+                    const date=new Date(rawDate);
+
+                    // Format: 05 Aug 2025
+                    const day=String(date.getDate()).padStart(2, '0');
+                    const month=date.toLocaleString('default', { month: 'short' }); // Aug
+                    const year=date.getFullYear();
+                    return `${day} ${month} ${year}`;
+
+                }
+
+            },
+
+
+            {
+                title: "Actions", formatter: function (cell, formatterParams, onRendered) {
+                    return `<a href="/admin/update-article/${cell.getData()._id}" class="btn btn-sm btn-success">Edit</a>
+                    <button class="btn btn-sm btn-danger delete-article" onclick="deleteArticle('${cell.getData()._id}')">Deleted</button>
+                    `
+                }
+
+            }
+        ]
+    })
+
+    const deleteArticle=async (id) => {
+        try {
+            if (confirm("Are You sure you want deleted this Article?")) {
+                const res=await fetch(`/admin/delete-article/${id}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    window.location.reload();
+                }
+            }
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+
+</script>
+
+<%- contentFor('tabulatorCSS') %>
+    <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
