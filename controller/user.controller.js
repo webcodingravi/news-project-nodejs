@@ -2,6 +2,8 @@ import UserModel from "../model/user.model.js"
 import NewsModel from "../model/news.model.js"
 import CategoryModel from "../model/category.model.js"
 import createError from "../utils/error-message.js"
+import { validationResult } from "express-validator"
+import fs from 'fs'
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import dotenv from "dotenv"
@@ -9,11 +11,16 @@ import SettingModel from "../model/setting.model.js"
 dotenv.config();
 
 export const loginPage=async (req, res) => {
-    res.render('admin/login', { layout: false });
+    res.render('admin/login', { layout: false, errors: 0 });
 }
 
 
 export const adminLogin=async (req, res, next) => {
+    const errors=validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.render('admin/login', { layout: false, errors: errors.array() });
+    }
+
     const { username, password }=req.body;
     try {
         const user=await UserModel.findOne({ username });
@@ -83,12 +90,25 @@ export const settings=async (req, res, next) => {
 
 export const saveSettings=async (req, res, next) => {
     const { website_title, footer_description }=req.body;
-    const website_logo=req.file? req.file.filename:null;
+    const website_logo=req.file?.filename;
     try {
-        await SettingModel.findOneAndUpdate({},
-            { website_title, website_logo, footer_description }, { new: true, upsert: true });
+        let setting=await SettingModel.findOne();
+        if (!setting) {
+            setting=new SettingModel();
+        }
+        setting.website_title=website_title;
+        setting.footer_description=footer_description;
+        if (website_logo) {
+            if (setting.website_logo) {
+                const logoPath=`./public/uploads/${setting.website_logo}`;
+                if (fs.existsSync(logoPath)) {
+                    fs.unlinkSync(logoPath)
+                }
+            }
+            setting.website_logo=website_logo;
+        }
 
-
+        await setting.save();
         res.redirect('/admin/settings')
     }
     catch (err) {
@@ -105,11 +125,16 @@ export const allUser=async (req, res) => {
 
 
 export const addUserPage=async (req, res) => {
-    res.render('admin/users/create', { role: req.role })
+    res.render('admin/users/create', { role: req.role, errors: 0 })
 }
 
 
 export const addUser=async (req, res) => {
+    const errors=validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.render('admin/users/create', { role: req.role, errors: errors.array() });
+    }
+
     try {
         await UserModel.create(req.body);
         res.redirect('/admin/users')
@@ -124,12 +149,13 @@ export const addUser=async (req, res) => {
 
 export const updateUserPage=async (req, res, next) => {
     const id=req.params.id;
+
     try {
         const user=await UserModel.findById(id)
         if (!user) {
             return next(createError('User not found', 404))
         }
-        res.render('admin/users/update', { user, role: req.role })
+        res.render('admin/users/update', { user, role: req.role, errors: 0 })
 
     }
     catch (err) {
@@ -140,6 +166,12 @@ export const updateUserPage=async (req, res, next) => {
 
 export const updateUser=async (req, res, next) => {
     const id=req.params.id;
+    const errors=validationResult(req);
+    const user=await UserModel.findById(id)
+    if (!errors.isEmpty()) {
+        return res.render('admin/users/update', { user, role: req.role, errors: errors.array() });
+    }
+
     const { fullname, password, role }=req.body
     try {
         const user=await UserModel.findById(id)
@@ -166,10 +198,19 @@ export const updateUser=async (req, res, next) => {
 export const deleteUser=async (req, res, next) => {
     const id=req.params.id;
     try {
-        const user=await UserModel.findByIdAndDelete(id)
+        const user=await UserModel.findById(id)
         if (!user) {
             return next(createError('User not found', 404))
         }
+
+        const article=await NewsModel.findOne({ author: id })
+        if (article) {
+            return res.status(400).json({ success: false, message: 'User is associated with an article' });
+        }
+
+
+        await user.deleteOne();
+
         res.json({ success: true })
     }
     catch (err) {

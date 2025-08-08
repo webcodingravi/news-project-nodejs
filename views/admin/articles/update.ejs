@@ -14,8 +14,18 @@
                             <div class="mb-3">
                                 <label for="article_title" class="form-label">Title</label>
                                 <input type="text" name="title" value="<%=article.title  %>" id="article_title"
-                                    class="form-control" autocomplete="off" required>
+                                    class="form-control" autocomplete="off" required placeholder="Title...">
                             </div>
+
+                            <div class="mb-3">
+                                <label for="short_desc" class="form-label">Short Description</label>
+                                <textarea rows="4" name="short_desc" id="short_desc" class="form-control"
+                                    autocomplete="off"
+                                    placeholder="Short Description"><%=article.short_desc  %></textarea>
+                            </div>
+
+
+
                             <div class="mb-3">
                                 <label for="summernote" class="form-label">Description</label>
                                 <textarea name="content" id="summernote" class="form-control" rows="5"
@@ -45,6 +55,8 @@
                             <input type="submit" name="submit" class="btn btn-primary" value="Update" />
                         </form>
                         <!--/Form -->
+                        <!-- Error Message -->
+                        <%- include('../partials/error') %>
                     </div>
                 </div>
             </div>
@@ -65,6 +77,13 @@
             height: 200
         });
     });
+    //Code to remove field "files" from the form
+    document.querySelector('form').addEventListener("submit", function (event) {
+        const unwantedField=document.querySelector('input[name="files"]');
+        if (unwantedField) {
+            unwantedField.remove()
+        }
+    })
 </script>
 
 

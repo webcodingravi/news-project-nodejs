@@ -50,6 +50,12 @@
                 if (res.ok) {
                     window.location.reload();
                 }
+
+                if (res.status==400) {
+                    const data=await res.json();
+                    console.log(data.message)
+                    alert(data.message)
+                }
             }
         }
         catch (err) {

@@ -6,9 +6,12 @@ const newsSchema=new Schema({
         type: String,
         required: true
     },
+    short_desc: {
+        type: String
+    },
     content: {
         type: String,
-        required: true
+
     },
     category: {
         type: mongoose.Types.ObjectId,

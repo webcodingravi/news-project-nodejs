@@ -6,7 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>News</title>
+    <title>
+        <% if(settings.website_title && settings.website_title.trim() !=='' ) {%>
+            <%=settings.website_title %>
+                <% }else { %>
+                    News
+                    <% } %>
+    </title>
+
+
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icon -->

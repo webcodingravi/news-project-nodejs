@@ -4,13 +4,14 @@ import fs from "fs"
 import path from "path"
 import { fileURLToPath } from 'url'
 import createError from "../utils/error-message.js"
+import { validationResult } from "express-validator"
 
 
 export const allArticle=async (req, res, next) => {
     let articles;
 
     try {
-        if (req.rol==='admin') {
+        if (req.role==='admin') {
             articles=await NewsModel.find().populate('category', 'name').populate('author', 'fullname')
             res.render('admin/articles', { articles, role: req.role })
         } else {
@@ -26,15 +27,20 @@ export const allArticle=async (req, res, next) => {
 
 }
 
-export const addArticlePage=async (req, res, next) => {
+export const addArticlePage=async (req, res) => {
     const categories=await CategoryModel.find();
-    res.render('admin/articles/create', { categories, role: req.role })
+    res.render('admin/articles/create', { categories, role: req.role, errors: 0 })
 }
 
-export const addArticle=async (req, res) => {
-    const { title, content, category }=req.body;
+export const addArticle=async (req, res, next) => {
+    const errors=validationResult(req);
+    if (!errors.isEmpty()) {
+        const categories=await CategoryModel.find();
+        return res.render('admin/articles/create', { categories, role: req.role, errors: errors.array() });
+    }
+    const { title, content, category, short_desc }=req.body;
     try {
-        const article=new NewsModel({ title, content, category, author: req.id, image: req.file.filename })
+        const article=new NewsModel({ title, content, short_desc, category, author: req.id, image: req.file.filename })
         await article.save();
         res.redirect('/admin/article');
 
@@ -58,7 +64,7 @@ export const updateArticlePage=async (req, res, next) => {
             }
         }
         const categories=await CategoryModel.find();
-        res.render('admin/articles/update', { article, categories, role: req.role })
+        res.render('admin/articles/update', { article, categories, role: req.role, errors: 0 })
     }
     catch (err) {
         next(err)
@@ -67,9 +73,19 @@ export const updateArticlePage=async (req, res, next) => {
 }
 
 export const updateArticle=async (req, res, next) => {
+    const id=req.params.id;
+    const errors=validationResult(req);
+    if (!errors.isEmpty()) {
+        const article=await NewsModel.findById(req.params.id).populate('category', 'name').populate('author', 'fullname')
+        const categories=await CategoryModel.find();
+        return res.render('admin/articles/update', { article, categories, role: req.role, errors: errors.array() });
+    }
+
     try {
-        const { title, content, category }=req.body;
-        const article=await NewsModel.findById(req.params.id);
+        const { title, content, category, short_desc }=req.body;
+
+        const article=await NewsModel.findById(id);
+
         if (!article) {
             return next(createError('Article Not Found', 404))
 
@@ -82,6 +98,7 @@ export const updateArticle=async (req, res, next) => {
 
         article.title=title;
         article.content=content;
+        article.short_desc=short_desc;
         article.category=category;
 
         if (req.file) {
@@ -108,10 +125,8 @@ export const deleteArticle=async (req, res, next) => {
 
         }
 
-        if (req.role=='author') {
-            if (req.id!=article.author._id) {
-                return next(createError('Unauthorized', 401))
-            }
+        if (req.role==='author'&&req.id!==article.author._id.toString()) {
+            return next(createError('Unauthorized', 401))
         }
         const __filename=fileURLToPath(import.meta.url);
         const __dirname=path.dirname(__filename);

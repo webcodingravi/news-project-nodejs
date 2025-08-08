@@ -2,7 +2,7 @@
     <!-- search box -->
     <div class="search-box-container">
         <h4>Search</h4>
-        <form class="search-post" action="search.html" method="GET">
+        <form class="search-post" action="/search" method="GET">
             <div class="input-group">
                 <input type="text" name="search" class="form-control" placeholder="Search .....">
                 <span class="input-group-btn">
@@ -15,91 +15,32 @@
     <!-- recent posts box -->
     <div class="recent-post-container">
         <h4>Recent Posts</h4>
-        <div class="recent-post">
-            <a class="post-img" href="">
-                <img src="images/post-format.jpg" alt="" />
-            </a>
-            <div class="post-content">
-                <h5><a href="single.html">Lorem ipsum dolor sit amet</a></h5>
-                <span>
-                    <i class="fa fa-tags" aria-hidden="true"></i>
-                    <a href='category.html'>Html</a>
-                </span>
-                <span>
-                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                    01 Nov, 2025
-                </span>
-                <a class="read-more" href="single.html">read more</a>
+        <% for(let news of latestNews) { %>
+            <div class="recent-post">
+                <a class="post-img" href="">
+                    <img src="/uploads/<%=news.image  %>" alt="" />
+                </a>
+                <div class="post-content">
+                    <h5><a href="/single/<%=news.id %>">
+                            <%=news.title %>
+                        </a></h5>
+                    <span>
+                        <i class="fa fa-tags" aria-hidden="true"></i>
+                        <a href="/category/<%=news.category.slug  %>">
+                            <%=news.category.name %>
+                        </a>
+                    </span>
+                    <span>
+                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                        <% const date=new Date(news.createdAt); const day=String(date.getDate()).padStart(2, '0' );
+                            const month=date.toLocaleString('default', { month: 'short' }); const
+                            year=date.getFullYear(); %>
+                            <%= `${day} ${month}, ${year}` %>
+                    </span>
+                    <a class="read-more" href="/single/<%=news.id %>">read more</a>
+                </div>
             </div>
-        </div>
-        <div class="recent-post">
-            <a class="post-img" href="">
-                <img src="images/post_1.jpg" alt="" />
-            </a>
-            <div class="post-content">
-                <h5><a href="single.html">Lorem ipsum dolor sit amet</a></h5>
-                <span>
-                    <i class="fa fa-tags" aria-hidden="true"></i>
-                    <a href='category.html'>Html</a>
-                </span>
-                <span>
-                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                    01 Nov, 2025
-                </span>
-                <a class="read-more" href="single.html">read more</a>
-            </div>
-        </div>
-        <div class="recent-post">
-            <a class="post-img" href="">
-                <img src="images/post-format.jpg" alt="" />
-            </a>
-            <div class="post-content">
-                <h5><a href="single.html">Lorem ipsum dolor sit amet</a></h5>
-                <span>
-                    <i class="fa fa-tags" aria-hidden="true"></i>
-                    <a href='category.html'>Html</a>
-                </span>
-                <span>
-                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                    01 Nov, 2025
-                </span>
-                <a class="read-more" href="single.html">read more</a>
-            </div>
-        </div>
-        <div class="recent-post">
-            <a class="post-img" href="">
-                <img src="images/post_1.jpg" alt="" />
-            </a>
-            <div class="post-content">
-                <h5><a href="single.html">Lorem ipsum dolor sit amet</a></h5>
-                <span>
-                    <i class="fa fa-tags" aria-hidden="true"></i>
-                    <a href='category.html'>Html</a>
-                </span>
-                <span>
-                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                    01 Nov, 2025
-                </span>
-                <a class="read-more" href="single.html">read more</a>
-            </div>
-        </div>
-        <div class="recent-post">
-            <a class="post-img" href="">
-                <img src="images/post-format.jpg" alt="" />
-            </a>
-            <div class="post-content">
-                <h5><a href="single.html">Lorem ipsum dolor sit amet</a></h5>
-                <span>
-                    <i class="fa fa-tags" aria-hidden="true"></i>
-                    <a href='category.html'>Html</a>
-                </span>
-                <span>
-                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                    01 Nov, 2025
-                </span>
-                <a class="read-more" href="single.html">read more</a>
-            </div>
-        </div>
+            <% } %>
     </div>
     <!-- /recent posts box -->
 </div>

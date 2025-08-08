@@ -4,7 +4,12 @@
         <div class="row justify-content-center">
             <!-- LOGO -->
             <div class="col-md-3">
-                <a href="index.html" id="logo"><img src="images/news.jpg" alt="Logo" /></a>
+                <% if(settings.website_logo && settings.website_logo.trim() !=='' ) {%>
+                    <a href="/" id="logo" style="width: 160px;"><img src="/uploads/<%= settings.website_logo %>"
+                            alt="Logo" /></a>
+                    <% }else { %>
+                        <a href="/" id="logo"><img src="/images/news.jpg" alt="Logo" /></a>
+                        <% } %>
             </div>
             <!-- /LOGO -->
         </div>
@@ -17,11 +22,13 @@
         <div class="row">
             <div class="col-md-12">
                 <ul class='menu'>
-                    <li><a href='index.html'>Home</a></li>
-                    <li><a href='category.html'>Business</a></li>
-                    <li><a href='category.html'>Entertainment</a></li>
-                    <li><a href='category.html'>Sports</a></li>
-                    <li><a href='category.html'>Politics</a></li>
+                    <li><a href="/">Home</a></li>
+                    <% for(let category of categories) { %>
+                        <li><a href='/category/<%=category.slug %>'>
+                                <%=category.name %>
+                            </a></li>
+                        <% } %>
+
                 </ul>
             </div>
         </div>

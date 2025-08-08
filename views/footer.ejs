@@ -2,8 +2,13 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <span>© Copyright 2025 News | Powered by <a href="http://www.yahubaba.com/">Yahu
-                        Baba</a></span>
+                <% if(settings.footer_description && settings.footer_description.trim() !=='' ) {%>
+                    <span>
+                        <%= settings.footer_description %>
+                    </span>
+                    <% }else { %>
+                        <span>© Copyright 2025 News | Powered by <a href="/">Ravi Kumar
+                                <% } %>
             </div>
         </div>
     </div>
