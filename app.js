@@ -14,7 +14,7 @@ const app=express();
 dotEnv.config();
 
 // Database
-mongoose.connect(process.env.DB)
+mongoose.connect(`${process.env.DB}/news-project`)
     .then(() => console.log("Database Successfully Conected!"))
     .catch((err) => console.log("Failed Database Conected!", err.message))
 
@@ -53,6 +53,7 @@ app.set('view engine', 'ejs');
 app.use('/admin', (req, res, next) => {
     res.locals.layout='admin/layout'
     next();
+
 })
 app.use("/admin", adminRouter);
 
